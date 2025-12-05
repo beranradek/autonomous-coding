@@ -3,7 +3,7 @@
 Autonomous Coding Agent
 =======================
 
-A minimal harness demonstrating long-running autonomous coding with Claude.
+A harness demonstrating long-running autonomous coding with Claude.
 This script implements the two-agent pattern (initializer + coding agent) and
 incorporates all the strategies from the long-running agents guide.
 
@@ -27,7 +27,7 @@ DEFAULT_MODEL = "claude-sonnet-4-5-20250929"
 def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
-        description="Autonomous Coding Agent Demo - Long-running agent harness",
+        description="Autonomous Coding Agent - Long-running agent harness",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:

@@ -1,6 +1,6 @@
 # Harness for long-running autonomous AI coding
 
-A minimal harness demonstrating long-running autonomous coding with the Claude Agent SDK. This demo implements a two-agent pattern (initializer + coding agent) that can:
+A harness for long-running autonomous coding with the Claude Agent SDK. This project implements a two-agent pattern (initializer + coding agent) that can:
 - Build complete applications from scratch (greenfield mode)
 - Add features to existing projects (enhancement mode)
 - Work across multiple long-running sessions
@@ -13,7 +13,12 @@ A minimal harness demonstrating long-running autonomous coding with the Claude A
 # Install Claude Code CLI (latest version required)
 npm install -g @anthropic-ai/claude-code
 
-# Install Python dependencies
+# Install Python dependencies - choose one method:
+
+# Option 1: Using uv (recommended - faster and automatic venv management)
+uv sync
+
+# Option 2: Traditional pip/venv approach
 python -m venv .venv
 source .venv/bin/activate # or for Windows: .venv\Scripts\activate
 pip install -r requirements.txt
@@ -22,6 +27,11 @@ pip install -r requirements.txt
 Verify your installations:
 ```bash
 claude --version  # Should be latest version
+
+# If using uv:
+uv run python -c "import claude_code_sdk; print(claude_code_sdk.__version__)"
+
+# If using pip:
 pip show claude-code-sdk  # Check SDK is installed
 ```
 
@@ -41,33 +51,44 @@ export CLAUDE_CODE_OAUTH_TOKEN='your-api-key-here'
 ### For New Projects (Greenfield Mode)
 
 ```bash
-# Auto-detected - creates new project from scratch
-python autonomous_agent.py --project-dir ./my_new_project
+# Using uv (recommended):
+uv run autonomous_agent.py --project-dir ./my_new_project
 
-# Or explicitly specify greenfield mode
-python autonomous_agent.py --project-dir ./my_new_project --mode greenfield
+# Or explicitly specify greenfield mode:
+uv run autonomous_agent.py --project-dir ./my_new_project --mode greenfield
+
+# Using traditional python (if not using uv):
+python autonomous_agent.py --project-dir ./my_new_project
 ```
 
 ### For Existing Projects (Enhancement Mode)
 
 ```bash
+# Using uv (recommended):
 # Auto-detected if .git directory exists
 # You can point to any existing project with an absolute path that can be outside of this repo
-python autonomous_agent.py --project-dir ./my_existing_project
+uv run autonomous_agent.py --project-dir ./my_existing_project
 
-# Or explicitly specify enhancement mode
+# Or explicitly specify enhancement mode:
+uv run autonomous_agent.py --project-dir ./my_existing_project --mode enhancement
+
+# Using traditional python (if not using uv):
 python autonomous_agent.py --project-dir ./my_existing_project --mode enhancement
 ```
 
 ### Testing with Limited Iterations
 
 ```bash
+# Using uv:
+uv run autonomous_agent.py --project-dir ./my_project --max-iterations 3
+
+# Using traditional python:
 python autonomous_agent.py --project-dir ./my_project --max-iterations 3
 ```
 
 ## Important Timing Expectations
 
-> **Warning: This demo takes a long time to run!**
+> **Warning: Autonomous implementation of provided example application specification takes a long time to run!**
 
 - **First session (initialization):** The agent generates a `feature_list.json` with 200 test cases. This takes several minutes and may appear to hang - this is normal. The agent is writing out all the features.
 
@@ -75,7 +96,7 @@ python autonomous_agent.py --project-dir ./my_project --max-iterations 3
 
 - **Full app:** Building all 200 features typically requires **many hours** of total runtime across multiple sessions.
 
-**Tip:** The 200 features parameter in the prompts is designed for comprehensive coverage. If you want faster demos, you can modify `prompts/initializer_prompt.md` to reduce the feature count (e.g., 20-50 features for a quicker demo).
+**Tip:** The 200 features parameter in the prompts is designed for comprehensive coverage. If you want faster runs, you can modify `prompts/initializer_prompt.md` to reduce the feature count (e.g., 20-50 features).
 
 ## How It Works
 
@@ -121,7 +142,7 @@ The harness supports two modes of operation:
 
 ## Security Model
 
-This demo uses a defense-in-depth security approach (see `security.py` and `client.py`):
+This project uses a defense-in-depth security approach (see `security.py` and `client.py`):
 
 1. **OS-level Sandbox:** Bash commands run in an isolated environment
 2. **Filesystem Restrictions:** File operations restricted to the project directory only
@@ -186,7 +207,7 @@ The application will typically be available at `http://localhost:3000` or simila
 
 | Option | Description | Default |
 |--------|-------------|---------|
-| `--project-dir` | Directory for the project | `./autonomous_demo_project` |
+| `--project-dir` | Directory for the project | `./autonomous_project` |
 | `--max-iterations` | Max agent iterations | Unlimited |
 | `--model` | Claude model to use | `claude-sonnet-4-5-20250929` |
 | `--mode` | Mode: `auto`, `greenfield`, or `enhancement` | `auto` (auto-detect) |
@@ -231,6 +252,11 @@ EOF
 
 ```bash
 # From the autonomous-coding directory
+
+# Using uv (recommended):
+uv run autonomous_agent.py --project-dir /path/to/your/existing/project --mode enhancement
+
+# Using traditional python:
 python autonomous_agent.py --project-dir /path/to/your/existing/project --mode enhancement
 ```
 
@@ -273,7 +299,9 @@ Edit `prompts/app_spec.txt` to specify a different application to build from scr
 
 1. Copy your existing project to a directory (or use an existing one)
 2. Create `app_spec.txt` in your project directory describing the NEW features to add
-3. Run: `python autonomous_agent.py --project-dir ./your_project --mode enhancement`
+3. Run:
+   - Using uv: `uv run autonomous_agent.py --project-dir ./your_project --mode enhancement`
+   - Using python: `python autonomous_agent.py --project-dir ./your_project --mode enhancement`
 
 **Important:** In enhancement mode, `app_spec.txt` should describe ONLY the new features you want to add, not the entire application.
 
@@ -282,7 +310,7 @@ Edit `prompts/app_spec.txt` to specify a different application to build from scr
 - **Greenfield:** Edit `prompts/initializer_prompt.md` and change the "200 features" requirement
 - **Enhancement:** Edit `prompts/enhancement_initializer_prompt.md` or specify the desired count in your `app_spec.txt`
 
-For faster demos, use a smaller number (e.g., 20-50 features).
+For faster runs, use a smaller number (e.g., 20-50 features).
 
 ### Modifying Allowed Commands
 

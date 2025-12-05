@@ -116,7 +116,7 @@ async def run_autonomous_agent(
         mode: Mode selection - "auto", "greenfield", or "enhancement"
     """
     print("\n" + "=" * 70)
-    print("  AUTONOMOUS CODING AGENT DEMO")
+    print("  AUTONOMOUS CODING AGENT")
     print("=" * 70)
     print(f"\nProject directory: {project_dir}")
     print(f"Model: {model}")
