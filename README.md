@@ -1,6 +1,9 @@
 # Harness for long-running autonomous AI coding
 
-A minimal harness demonstrating long-running autonomous coding with the Claude Agent SDK. This demo implements a two-agent pattern (initializer + coding agent) that can build complete applications over multiple sessions.
+A minimal harness demonstrating long-running autonomous coding with the Claude Agent SDK. This demo implements a two-agent pattern (initializer + coding agent) that can:
+- Build complete applications from scratch (greenfield mode)
+- Add features to existing projects (enhancement mode)
+- Work across multiple long-running sessions
 
 ## Prerequisites
 
@@ -28,16 +31,32 @@ pip show claude-code-sdk  # Check SDK is installed
 export CLAUDE_CODE_OAUTH_TOKEN='your-api-key-here'
 ```
 
-Prepare specification of your application:
-Copy `app_spec-template.txt` into `app_spec.txt`
+Prepare specification of your application `app_spec.txt`.
 
 ## Quick Start
 
+### For New Projects (Greenfield Mode)
+
 ```bash
-python autonomous_agent.py --project-dir ./my_project
+# Auto-detected - creates new project from scratch
+python autonomous_agent.py --project-dir ./my_new_project
+
+# Or explicitly specify greenfield mode
+python autonomous_agent.py --project-dir ./my_new_project --mode greenfield
 ```
 
-For testing with limited iterations:
+### For Existing Projects (Enhancement Mode)
+
+```bash
+# Auto-detected if .git directory exists
+python autonomous_agent.py --project-dir ./my_existing_project
+
+# Or explicitly specify enhancement mode
+python autonomous_agent.py --project-dir ./my_existing_project --mode enhancement
+```
+
+### Testing with Limited Iterations
+
 ```bash
 python autonomous_agent.py --project-dir ./my_project --max-iterations 3
 ```
@@ -56,11 +75,38 @@ python autonomous_agent.py --project-dir ./my_project --max-iterations 3
 
 ## How It Works
 
-### Two-Agent Pattern
+### Two-Agent Pattern with Dual Modes
 
-1. **Initializer Agent (Session 1):** Reads `app_spec.txt`, creates `feature_list.json` with 200 test cases, sets up project structure, and initializes git.
+The harness supports two modes of operation:
 
-2. **Coding Agent (Sessions 2+):** Picks up where the previous session left off, implements features one by one, and marks them as passing in `feature_list.json`.
+#### Greenfield Mode (New Projects)
+
+1. **Greenfield Initializer Agent (Session 1):**
+   - Reads `app_spec.txt`
+   - Creates `feature_list.json` with 200 test cases
+   - Sets up project structure from scratch
+   - Initializes git repository
+   - Creates `init.sh` for environment setup
+
+2. **Coding Agent (Sessions 2+):**
+   - Picks up where the previous session left off
+   - Implements features one by one
+   - Marks them as passing in `feature_list.json`
+
+#### Enhancement Mode (Existing Projects)
+
+1. **Enhancement Initializer Agent (Session 1):**
+   - Analyzes existing codebase structure
+   - Reads `app_spec.txt` (defines NEW features to add)
+   - Creates `feature_list.json` with test cases for NEW features only
+   - Creates/updates `init.sh` if needed
+   - Creates `agent_progress.txt` with codebase analysis
+   - Does NOT reinitialize git (preserves existing repository)
+
+2. **Coding Agent (Sessions 2+):**
+   - Same as greenfield mode
+   - Adds new features to existing codebase
+   - Respects existing architecture and patterns
 
 ### Session Management
 
@@ -87,16 +133,17 @@ Commands not in the allowlist are blocked by the security hook.
 
 ```
 autonomous-coding/
-├── autonomous_agent.py  # Main entry point
+├── autonomous_agent.py       # Main entry point
 ├── agent.py                  # Agent session logic
 ├── client.py                 # Claude SDK client configuration
 ├── security.py               # Bash command allowlist and validation
 ├── progress.py               # Progress tracking utilities
 ├── prompts.py                # Prompt loading utilities
 ├── prompts/
-│   ├── app_spec.txt          # Application specification
-│   ├── initializer_prompt.md # First session prompt
-│   └── coding_prompt.md      # Continuation session prompt
+│   ├── app_spec.txt                    # Application specification (greenfield)
+│   ├── initializer_prompt.md           # Greenfield first session prompt
+│   ├── enhancement_initializer_prompt.md # Enhancement first session prompt
+│   └── coding_prompt.md                # Continuation session prompt
 └── requirements.txt          # Python dependencies
 ```
 
@@ -138,16 +185,100 @@ The application will typically be available at `http://localhost:3000` or simila
 | `--project-dir` | Directory for the project | `./autonomous_demo_project` |
 | `--max-iterations` | Max agent iterations | Unlimited |
 | `--model` | Claude model to use | `claude-sonnet-4-5-20250929` |
+| `--mode` | Mode: `auto`, `greenfield`, or `enhancement` | `auto` (auto-detect) |
+
+### Mode Selection
+
+- **`auto`** (default): Automatically detects mode based on project state
+  - If `.git` exists but no `feature_list.json` → Enhancement mode
+  - If neither exists → Greenfield mode
+  - If `feature_list.json` exists → Continue mode
+- **`greenfield`**: Force creation of new project from scratch
+- **`enhancement`**: Force enhancement mode for existing projects
+
+## Enhancement Mode Workflow
+
+Here's a complete example of adding features to an existing project:
+
+### Step 1: Prepare Your Project
+
+```bash
+# If you have an existing project
+cd /path/to/your/existing/project
+
+# Ensure it has a git repository
+git status  # Should show it's a git repo
+
+# Create an app_spec.txt describing NEW features
+cat > app_spec.txt << 'EOF'
+# New Features for My Existing App
+
+## Feature: Dark Mode Toggle
+Add a dark mode theme toggle that persists user preference...
+
+## Feature: Export to PDF
+Add ability to export reports as PDF files...
+
+[Describe all new features you want to add]
+EOF
+```
+
+### Step 2: Run the Enhancement Agent
+
+```bash
+# From the autonomous-coding directory
+python autonomous_agent.py --project-dir /path/to/your/existing/project --mode enhancement
+```
+
+### Step 3: What Happens
+
+1. **Session 1 (Enhancement Initializer):**
+   - Agent analyzes your existing codebase
+   - Creates `feature_list.json` with tests for NEW features only
+   - Creates `agent_progress.txt` with codebase analysis
+   - May start implementing first features
+
+2. **Session 2+ (Coding Agent):**
+   - Continues adding features from `feature_list.json`
+   - Respects your existing architecture
+   - Commits progress regularly
+
+### Step 4: Monitor Progress
+
+The agent will:
+- Leave your existing code intact
+- Add new features incrementally
+- Update `feature_list.json` as features pass
+- Can be paused with `Ctrl+C` and resumed anytime
+
+### Important Notes for Enhancement Mode
+
+- **Existing files are preserved** unless they need modification for new features
+- **Git history is preserved** - agent adds commits, doesn't reinitialize
+- **Architecture is respected** - agent analyzes and follows your patterns
+- **init.sh is updated** if needed for new dependencies
+- **Specify feature count** in your app_spec.txt (e.g., "create 50 features" or "create 20 features")
 
 ## Customization
 
-### Changing the Application
+### Changing the Application (Greenfield Mode)
 
-Edit `prompts/app_spec.txt` to specify a different application to build.
+Edit `prompts/app_spec.txt` to specify a different application to build from scratch.
+
+### Adding Features to Existing Project (Enhancement Mode)
+
+1. Copy your existing project to a directory (or use an existing one)
+2. Create `app_spec.txt` in your project directory describing the NEW features to add
+3. Run: `python autonomous_agent.py --project-dir ./your_project --mode enhancement`
+
+**Important:** In enhancement mode, `app_spec.txt` should describe ONLY the new features you want to add, not the entire application.
 
 ### Adjusting Feature Count
 
-Edit `prompts/initializer_prompt.md` and change the "200 features" requirement to a smaller number for faster demos.
+- **Greenfield:** Edit `prompts/initializer_prompt.md` and change the "200 features" requirement
+- **Enhancement:** Edit `prompts/enhancement_initializer_prompt.md` or specify the desired count in your `app_spec.txt`
+
+For faster demos, use a smaller number (e.g., 20-50 features).
 
 ### Modifying Allowed Commands
 

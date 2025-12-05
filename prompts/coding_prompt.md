@@ -8,7 +8,7 @@ This is a FRESH context window - you have no memory of previous sessions.
 Start by orienting yourself:
 
 ```bash
-# 1. See your working directory
+# 1. See your working directory. You can operate in this directory and cannot `cd` to other directories
 pwd
 
 # 2. List files to understand project structure

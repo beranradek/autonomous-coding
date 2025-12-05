@@ -31,17 +31,23 @@ def parse_args() -> argparse.Namespace:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Start fresh project
-  python autonomous_agent.py --project-dir ./claude_clone
+  # Start fresh project (auto-detected)
+  python autonomous_agent.py --project-dir ./new_project
 
-  # Use a specific model
-  python autonomous_agent.py --project-dir ./claude_clone --model claude-sonnet-4-5-20250929
+  # Add features to existing project (auto-detected if .git exists)
+  python autonomous_agent.py --project-dir ./existing_project
+
+  # Force greenfield mode (create new project)
+  python autonomous_agent.py --project-dir ./new_project --mode greenfield
+
+  # Force enhancement mode (add to existing project)
+  python autonomous_agent.py --project-dir ./existing_project --mode enhancement
 
   # Limit iterations for testing
-  python autonomous_agent.py --project-dir ./claude_clone --max-iterations 5
+  python autonomous_agent.py --project-dir ./project --max-iterations 5
 
-  # Continue existing project
-  python autonomous_agent.py --project-dir ./claude_clone
+  # Use a specific model
+  python autonomous_agent.py --project-dir ./project --model claude-sonnet-4-5-20250929
         """,
     )
 
@@ -64,6 +70,14 @@ Examples:
         type=str,
         default=DEFAULT_MODEL,
         help=f"Claude model to use (default: {DEFAULT_MODEL})",
+    )
+
+    parser.add_argument(
+        "--mode",
+        type=str,
+        choices=["auto", "greenfield", "enhancement"],
+        default="auto",
+        help="Mode: auto (auto-detect), greenfield (new project), enhancement (existing project). Default: auto",
     )
 
     return parser.parse_args()
@@ -95,6 +109,7 @@ def main() -> None:
                 project_dir=project_dir,
                 model=args.model,
                 max_iterations=args.max_iterations,
+                mode=args.mode,
             )
         )
     except KeyboardInterrupt:

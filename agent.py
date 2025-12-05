@@ -13,7 +13,13 @@ from claude_code_sdk import ClaudeSDKClient
 
 from client import create_client
 from progress import print_session_header, print_progress_summary
-from prompts import get_initializer_prompt, get_coding_prompt, copy_spec_to_project
+from prompts import (
+    get_initializer_prompt,
+    get_coding_prompt,
+    get_enhancement_initializer_prompt,
+    copy_spec_to_project,
+    copy_or_verify_spec,
+)
 
 
 # Configuration
@@ -98,6 +104,7 @@ async def run_autonomous_agent(
     project_dir: Path,
     model: str,
     max_iterations: Optional[int] = None,
+    mode: str = "auto",
 ) -> None:
     """
     Run the autonomous agent loop.
@@ -106,6 +113,7 @@ async def run_autonomous_agent(
         project_dir: Directory for the project
         model: Claude model to use
         max_iterations: Maximum number of iterations (None for unlimited)
+        mode: Mode selection - "auto", "greenfield", or "enhancement"
     """
     print("\n" + "=" * 70)
     print("  AUTONOMOUS CODING AGENT DEMO")
@@ -121,24 +129,60 @@ async def run_autonomous_agent(
     # Create project directory
     project_dir.mkdir(parents=True, exist_ok=True)
 
-    # Check if this is a fresh start or continuation
+    # Check what exists in the project
     tests_file = project_dir / "feature_list.json"
-    is_first_run = not tests_file.exists()
+    progress_file = project_dir / "agent_progress.txt"
+    spec_file = project_dir / "app_spec.txt"
+    git_dir = project_dir / ".git"
 
-    if is_first_run:
-        print("Fresh start - will use initializer agent")
+    has_git = git_dir.exists()
+    has_features = tests_file.exists()
+    has_progress = progress_file.exists()
+
+    # Determine run mode
+    if mode == "auto":
+        # Auto-detect based on what exists
+        if not has_features and not has_progress:
+            # No harness files exist
+            if has_git:
+                run_mode = "enhancement_init"
+                print("Existing project detected (has .git) - will use enhancement initializer")
+            else:
+                run_mode = "greenfield_init"
+                print("Fresh start - will use greenfield initializer")
+        else:
+            # Harness files exist - continue mode
+            run_mode = "continue"
+            print("Continuing existing autonomous session")
+            print_progress_summary(project_dir)
+    elif mode == "greenfield":
+        run_mode = "greenfield_init"
+        print("Greenfield mode - will create new project from scratch")
+    elif mode == "enhancement":
+        run_mode = "enhancement_init"
+        print("Enhancement mode - will add features to existing project")
+    else:
+        raise ValueError(f"Invalid mode: {mode}")
+
+    # Handle spec file based on mode
+    if run_mode == "greenfield_init":
         print()
         print("=" * 70)
-        print("  NOTE: First session takes 10-20+ minutes!")
-        print("  The agent is generating 200 detailed test cases.")
+        print("  NOTE: First session can take 10-20+ minutes!")
+        print("  The agent is generating detailed test cases.")
         print("  This may appear to hang - it's working. Watch for [Tool: ...] output.")
         print("=" * 70)
         print()
-        # Copy the app spec into the project directory for the agent to read
         copy_spec_to_project(project_dir)
-    else:
-        print("Continuing existing project")
-        print_progress_summary(project_dir)
+    elif run_mode == "enhancement_init":
+        print()
+        print("=" * 70)
+        print("  NOTE: Enhancement initialization may take 10-20+ minutes!")
+        print("  The agent is analyzing your codebase and generating test cases.")
+        print("  This may appear to hang - it's working. Watch for [Tool: ...] output.")
+        print("=" * 70)
+        print()
+        copy_or_verify_spec(project_dir)
 
     # Main loop
     iteration = 0
@@ -153,15 +197,19 @@ async def run_autonomous_agent(
             break
 
         # Print session header
-        print_session_header(iteration, is_first_run)
+        is_initializer = run_mode in ["greenfield_init", "enhancement_init"]
+        print_session_header(iteration, is_initializer)
 
         # Create client (fresh context)
         client = create_client(project_dir, model)
 
-        # Choose prompt based on session type
-        if is_first_run:
+        # Choose prompt based on run mode
+        if run_mode == "greenfield_init":
             prompt = get_initializer_prompt()
-            is_first_run = False  # Only use initializer once
+            run_mode = "continue"  # Switch to continue mode after first session
+        elif run_mode == "enhancement_init":
+            prompt = get_enhancement_initializer_prompt()
+            run_mode = "continue"  # Switch to continue mode after first session
         else:
             prompt = get_coding_prompt()
 
@@ -197,10 +245,7 @@ async def run_autonomous_agent(
     print("  TO RUN THE GENERATED APPLICATION:")
     print("-" * 70)
     print(f"\n  cd {project_dir.resolve()}")
-    print("  ./init.sh           # Run the setup script")
-    print("  # Or manually:")
-    print("  npm install && npm run dev")
-    print("\n  Then open http://localhost:3000 (or check init.sh for the URL)")
+    print("  ./init.sh           # Check and then run the setup script")
     print("-" * 70)
 
     print("\nDone!")
