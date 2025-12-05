@@ -31,7 +31,10 @@ pip show claude-code-sdk  # Check SDK is installed
 export CLAUDE_CODE_OAUTH_TOKEN='your-api-key-here'
 ```
 
-Prepare specification of your application `app_spec.txt`.
+**Prepare your application specification in prompts/app_spec.txt:**
+- See `GENERATING_APP_SPEC.md` for detailed guidance
+- Use `prompts/app_spec_generator_prompt.md` with an AI assistant to generate specifications
+- Or copy and modify `prompts/app_spec_example.txt`
 
 ## Quick Start
 
