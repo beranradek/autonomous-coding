@@ -12,7 +12,7 @@ npm install -g @anthropic-ai/claude-code
 
 # Install Python dependencies
 python -m venv .venv
-.venv\Scripts\activate # or for Linux: source .venv/bin/activate
+source .venv/bin/activate # or for Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
