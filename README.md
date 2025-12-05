@@ -49,6 +49,7 @@ python autonomous_agent.py --project-dir ./my_new_project --mode greenfield
 
 ```bash
 # Auto-detected if .git directory exists
+# You can point to any existing project with an absolute path that can be outside of this repo
 python autonomous_agent.py --project-dir ./my_existing_project
 
 # Or explicitly specify enhancement mode
