@@ -9,26 +9,49 @@ Uses an allowlist approach - only explicitly permitted commands can run.
 import os
 import shlex
 
-
 # Allowed commands for development tasks
-# Minimal set needed for the autonomous coding demo
+# Set needed for the autonomous coding
 ALLOWED_COMMANDS = {
     # File inspection
     "ls",
     "cat",
+    "find",
     "head",
     "tail",
     "wc",
     "grep",
+    "awk",
     # File operations (agent uses SDK tools for most file ops, but cp/mkdir needed occasionally)
     "cp",
     "mkdir",
     "chmod",  # For making scripts executable; validated separately
+    "rm", # Be aware...
+    "rmdir", # Be aware...
+    "mv", # Be aware...
     # Directory
     "pwd",
     # Node.js development
     "npm",
     "node",
+    # Java development
+    "gradle",
+    "gradlew",
+    "java",
+    # Python development
+    "python",
+    "pip",
+    "uv",
+    "uvx",
+    "ruff",
+    "mypy",
+    # Image development
+    "docker",
+    "kubectl",
+    # Databases
+    "psql",
+    "mysql",
+    # Web calls
+    "curl",
     # Version control
     "git",
     # Process management
@@ -36,6 +59,8 @@ ALLOWED_COMMANDS = {
     "lsof",
     "sleep",
     "pkill",  # For killing dev servers; validated separately
+    "systemctl",
+    "source",
     # Script execution
     "init.sh",  # Init scripts; validated separately
 }
@@ -333,7 +358,7 @@ async def bash_security_hook(input_data, tool_use_id=None, context=None):
         if cmd not in ALLOWED_COMMANDS:
             return {
                 "decision": "block",
-                "reason": f"Command '{cmd}' is not in the allowed commands list",
+                "reason": f"Command '{cmd}' is not in the allowed commands list.",
             }
 
         # Additional validation for sensitive commands

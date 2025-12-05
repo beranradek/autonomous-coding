@@ -3,3 +3,6 @@ generations/
 
 # Log files
 logs/
+
+.venv/
+.claude/

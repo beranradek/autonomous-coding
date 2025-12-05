@@ -11,6 +11,8 @@ A minimal harness demonstrating long-running autonomous coding with the Claude A
 npm install -g @anthropic-ai/claude-code
 
 # Install Python dependencies
+python -m venv .venv
+.venv\Scripts\activate # or for Linux: source .venv/bin/activate
 pip install -r requirements.txt
 ```
 

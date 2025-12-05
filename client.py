@@ -26,6 +26,19 @@ PUPPETEER_TOOLS = [
     "mcp__puppeteer__puppeteer_evaluate",
 ]
 
+# Serena MCP tools
+SERENA_TOOLS = [
+    "mcp__serena__find_file",
+    "mcp__serena__think_about_collected_information",
+    "mcp__serena__search_for_pattern",
+    "mcp__serena__find_symbol",
+    "mcp__serena__get_symbols_overview",
+    "mcp__serena__replace_symbol_body",
+    "mcp__serena__insert_before_symbol",
+    "mcp__serena__list_dir",
+    "mcp__serena__find_referencing_symbols",
+]
+
 # Built-in tools
 BUILTIN_TOOLS = [
     "Read",
@@ -76,8 +89,11 @@ def create_client(project_dir: Path, model: str) -> ClaudeSDKClient:
                 # Bash permission granted here, but actual commands are validated
                 # by the bash_security_hook (see security.py for allowed commands)
                 "Bash(*)",
+                "WebFetch(*)",
+                "WebSearch",
                 # Allow Puppeteer MCP tools for browser automation
                 *PUPPETEER_TOOLS,
+                *SERENA_TOOLS,
             ],
         },
     }
