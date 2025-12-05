@@ -52,13 +52,13 @@ export CLAUDE_CODE_OAUTH_TOKEN='your-api-key-here'
 
 ```bash
 # Using uv (recommended):
-uv run autonomous_agent.py --project-dir ./my_new_project
+uv run autocode.py --project-dir ./my_new_project
 
 # Or explicitly specify greenfield mode:
-uv run autonomous_agent.py --project-dir ./my_new_project --mode greenfield
+uv run autocode.py --project-dir ./my_new_project --mode greenfield
 
 # Using traditional python (if not using uv):
-python autonomous_agent.py --project-dir ./my_new_project
+python autocode.py --project-dir ./my_new_project
 ```
 
 ### For Existing Projects (Enhancement Mode)
@@ -67,23 +67,23 @@ python autonomous_agent.py --project-dir ./my_new_project
 # Using uv (recommended):
 # Auto-detected if .git directory exists
 # You can point to any existing project with an absolute path that can be outside of this repo
-uv run autonomous_agent.py --project-dir ./my_existing_project
+uv run autocode.py --project-dir ./my_existing_project
 
 # Or explicitly specify enhancement mode:
-uv run autonomous_agent.py --project-dir ./my_existing_project --mode enhancement
+uv run autocode.py --project-dir ./my_existing_project --mode enhancement
 
 # Using traditional python (if not using uv):
-python autonomous_agent.py --project-dir ./my_existing_project --mode enhancement
+python autocode.py --project-dir ./my_existing_project --mode enhancement
 ```
 
 ### Testing with Limited Iterations
 
 ```bash
 # Using uv:
-uv run autonomous_agent.py --project-dir ./my_project --max-iterations 3
+uv run autocode.py --project-dir ./my_project --max-iterations 3
 
 # Using traditional python:
-python autonomous_agent.py --project-dir ./my_project --max-iterations 3
+python autocode.py --project-dir ./my_project --max-iterations 3
 ```
 
 ## Important Timing Expectations
@@ -158,7 +158,7 @@ Commands not in the allowlist are blocked by the security hook.
 
 ```
 autonomous-coding/
-├── autonomous_agent.py       # Main entry point
+├── autocode.py       # Main entry point
 ├── agent.py                  # Agent session logic
 ├── client.py                 # Claude SDK client configuration
 ├── security.py               # Bash command allowlist and validation
@@ -254,10 +254,10 @@ EOF
 # From the autonomous-coding directory
 
 # Using uv (recommended):
-uv run autonomous_agent.py --project-dir /path/to/your/existing/project --mode enhancement
+uv run autocode.py --project-dir /path/to/your/existing/project --mode enhancement
 
 # Using traditional python:
-python autonomous_agent.py --project-dir /path/to/your/existing/project --mode enhancement
+python autocode.py --project-dir /path/to/your/existing/project --mode enhancement
 ```
 
 ### Step 3: What Happens
@@ -300,8 +300,8 @@ Edit `prompts/app_spec.txt` to specify a different application to build from scr
 1. Copy your existing project to a directory (or use an existing one)
 2. Create `app_spec.txt` in your project directory describing the NEW features to add
 3. Run:
-   - Using uv: `uv run autonomous_agent.py --project-dir ./your_project --mode enhancement`
-   - Using python: `python autonomous_agent.py --project-dir ./your_project --mode enhancement`
+   - Using uv: `uv run autocode.py --project-dir ./your_project --mode enhancement`
+   - Using python: `python autocode.py --project-dir ./your_project --mode enhancement`
 
 **Important:** In enhancement mode, `app_spec.txt` should describe ONLY the new features you want to add, not the entire application.
 

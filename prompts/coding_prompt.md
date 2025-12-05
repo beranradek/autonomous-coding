@@ -81,6 +81,8 @@ Implement the chosen feature thoroughly:
 3. Fix any issues discovered
 4. Verify the feature works end-to-end
 
+You can use context7 tools to lookup up-to-date documentation of frameworks and libraries if useful.
+
 ### STEP 6: VERIFY WITH BROWSER AUTOMATION
 
 **CRITICAL:** You MUST verify features through the actual UI.

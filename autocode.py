@@ -8,8 +8,8 @@ This script implements the two-agent pattern (initializer + coding agent) and
 incorporates all the strategies from the long-running agents guide.
 
 Example Usage:
-    python autonomous_agent.py --project-dir ./claude_clone_demo
-    python autonomous_agent.py --project-dir ./claude_clone_demo --max-iterations 5
+    python autocode.py --project-dir ./claude_clone_demo
+    python autocode.py --project-dir ./claude_clone_demo --max-iterations 5
 """
 
 import argparse
@@ -32,22 +32,22 @@ def parse_args() -> argparse.Namespace:
         epilog="""
 Examples:
   # Start fresh project (auto-detected)
-  python autonomous_agent.py --project-dir ./new_project
+  python autocode.py --project-dir ./new_project
 
   # Add features to existing project (auto-detected if .git exists)
-  python autonomous_agent.py --project-dir ./existing_project
+  python autocode.py --project-dir ./existing_project
 
   # Force greenfield mode (create new project)
-  python autonomous_agent.py --project-dir ./new_project --mode greenfield
+  python autocode.py --project-dir ./new_project --mode greenfield
 
   # Force enhancement mode (add to existing project)
-  python autonomous_agent.py --project-dir ./existing_project --mode enhancement
+  python autocode.py --project-dir ./existing_project --mode enhancement
 
   # Limit iterations for testing
-  python autonomous_agent.py --project-dir ./project --max-iterations 5
+  python autocode.py --project-dir ./project --max-iterations 5
 
   # Use a specific model
-  python autonomous_agent.py --project-dir ./project --model claude-sonnet-4-5-20250929
+  python autocode.py --project-dir ./project --model claude-sonnet-4-5-20250929
         """,
     )
 

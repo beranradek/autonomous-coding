@@ -82,6 +82,8 @@ Set up the basic project structure based on what's specified in `app_spec.txt`.
 This typically includes directories for frontend, backend, and any other
 components mentioned in the spec.
 
+You can use context7 tools to lookup up-to-date documentation of frameworks and libraries if useful.
+
 ### OPTIONAL: Start Implementation
 
 If you have time remaining in this session, you may begin implementing

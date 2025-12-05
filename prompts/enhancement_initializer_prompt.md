@@ -22,13 +22,11 @@ Read `AGENTS.md` or `CLAUDE.md` if they exist, read `README.md` if it exists.
 
 ### SECOND: Read the Enhancement Specification
 
-Read `app_spec.txt` in your working directory. This file contains the specification
-for the NEW features you need to add to the existing project. Read it carefully
-before proceeding.
+Read `app_spec.txt` in your working directory. This file contains the specification for the NEW features you need to add to the existing project. Read it carefully before proceeding.
 
-**CRITICAL:** This is an EXISTING project. Do NOT recreate or modify existing
-functionality unless explicitly requested in `app_spec.txt`. Only implement
-NEW features specified in the document.
+You can use context7 tools to lookup up-to-date documentation of frameworks and libraries if useful.
+
+**CRITICAL:** This is an EXISTING project. Do NOT recreate or modify existing functionality unless explicitly requested in `app_spec.txt`. Only implement NEW features specified in the document.
 
 ### THIRD TASK: Create feature_list.json
 

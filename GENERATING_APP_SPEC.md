@@ -125,7 +125,7 @@ Once you have your `app_spec.txt`:
 cp app_spec.txt prompts/app_spec.txt
 
 # Run the agent
-python autonomous_agent.py --project-dir ./my_new_project
+python autocode.py --project-dir ./my_new_project
 ```
 
 ### For Enhancement Projects
@@ -134,7 +134,7 @@ python autonomous_agent.py --project-dir ./my_new_project
 cp app_spec.txt /path/to/existing/project/app_spec.txt
 
 # Run the agent
-python autonomous_agent.py --project-dir /path/to/existing/project --mode enhancement
+python autocode.py --project-dir /path/to/existing/project --mode enhancement
 ```
 
 ## Tips for Good Specifications

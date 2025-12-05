@@ -15,6 +15,11 @@ from claude_code_sdk.types import HookMatcher
 from security import bash_security_hook
 from subscription import api_key
 
+CONTEXT7_TOOLS = [
+    "mcp__context7__resolve-library-id",
+    "mcp__context7__get-library-docs",
+]
+
 # Puppeteer MCP tools for browser automation
 PUPPETEER_TOOLS = [
     "mcp__puppeteer__puppeteer_navigate",
@@ -91,6 +96,7 @@ def create_client(project_dir: Path, model: str) -> ClaudeSDKClient:
                 "Bash(*)",
                 "WebFetch(*)",
                 "WebSearch",
+                *CONTEXT7_TOOLS,
                 # Allow Puppeteer MCP tools for browser automation
                 *PUPPETEER_TOOLS,
                 # *SERENA_TOOLS,
@@ -110,7 +116,7 @@ def create_client(project_dir: Path, model: str) -> ClaudeSDKClient:
     print("   - Sandbox enabled (OS-level bash isolation)")
     print(f"   - Filesystem restricted to: {project_dir.resolve()}")
     print("   - Bash commands restricted to allowlist (see security.py)")
-    print("   - MCP servers: puppeteer (browser automation)")
+    print("   - MCP servers: context7, puppeteer (browser automation)")
     print()
 
     return ClaudeSDKClient(
@@ -119,11 +125,13 @@ def create_client(project_dir: Path, model: str) -> ClaudeSDKClient:
             system_prompt="You are an expert full-stack developer building a production-quality web application.",
             allowed_tools=[
                 *BUILTIN_TOOLS,
+                *CONTEXT7_TOOLS,
                 *PUPPETEER_TOOLS,
                 # *SERENA_TOOLS,
             ],
             mcp_servers={
-                "puppeteer": {"command": "npx", "args": ["puppeteer-mcp-server"]}
+                "context7": {"command": "npx", "args": ["-y", "@upstash/context7-mcp@latest"]},
+                "puppeteer": {"command": "npx", "args": ["puppeteer-mcp-server"]},
             },
             hooks={
                 "PreToolUse": [
