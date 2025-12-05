@@ -30,9 +30,11 @@ ALLOWED_COMMANDS = {
     "mv", # Be aware...
     # Directory
     "pwd",
+    # "cd", # Be aware...
     # Node.js development
     "npm",
     "node",
+    "pnpm",
     # Java development
     "gradle",
     "gradlew",
@@ -61,6 +63,9 @@ ALLOWED_COMMANDS = {
     "pkill",  # For killing dev servers; validated separately
     "systemctl",
     "source",
+    # Others
+    "echo",
+    "which",
     # Script execution
     "init.sh",  # Init scripts; validated separately
 }

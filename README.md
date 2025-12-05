@@ -161,6 +161,14 @@ This is normal. The initializer agent is generating 200 detailed test cases, whi
 **"Command blocked by security hook"**
 The agent tried to run a command not in the allowlist. This is the security system working as intended. If needed, add the command to `ALLOWED_COMMANDS` in `security.py`.
 
+**"MCP error -32603: Failed to launch the browser process"**
+No usable sandbox! If you are running on Ubuntu 23.10+ or another Linux distro that has disabled unprivileged user namespaces with AppArmor, see https://chromium.googlesource.com/chromium/src/+/main/docs/security/apparmor-userns-restrictions.md. Otherwise see https://chromium.googlesource.com/chromium/src/+/main/docs/linux/suid_sandbox_development.md for more information.
+
+If you have Google Chrome installed, easiest and safest way is to
+use setuid sandbox helper (the old version of the sandbox) available at /opt/google/chrome/chrome-sandbox. You can tell developer builds to use it by putting the following in your ~/.bashrc:
+
+`export CHROME_DEVEL_SANDBOX=/opt/google/chrome/chrome-sandbox`
+
 ## License
 
 Internal Anthropic use.
