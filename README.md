@@ -1,4 +1,4 @@
-# Effective harnesses for long-running agents
+# Harness for long-running autonomous AI coding
 
 A minimal harness demonstrating long-running autonomous coding with the Claude Agent SDK. This demo implements a two-agent pattern (initializer + coding agent) that can build complete applications over multiple sessions.
 
@@ -168,7 +168,3 @@ If you have Google Chrome installed, easiest and safest way is to
 use setuid sandbox helper (the old version of the sandbox) available at /opt/google/chrome/chrome-sandbox. You can tell developer builds to use it by putting the following in your ~/.bashrc:
 
 `export CHROME_DEVEL_SANDBOX=/opt/google/chrome/chrome-sandbox`
-
-## License
-
-Internal Anthropic use.
