@@ -1,4 +1,4 @@
-# Autonomous Coding Agent Demo
+# Effective harnesses for long-running agents
 
 A minimal harness demonstrating long-running autonomous coding with the Claude Agent SDK. This demo implements a two-agent pattern (initializer + coding agent) that can build complete applications over multiple sessions.
 
