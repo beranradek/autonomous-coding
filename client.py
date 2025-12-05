@@ -93,7 +93,7 @@ def create_client(project_dir: Path, model: str) -> ClaudeSDKClient:
                 "WebSearch",
                 # Allow Puppeteer MCP tools for browser automation
                 *PUPPETEER_TOOLS,
-                *SERENA_TOOLS,
+                # *SERENA_TOOLS,
             ],
         },
     }
@@ -120,6 +120,7 @@ def create_client(project_dir: Path, model: str) -> ClaudeSDKClient:
             allowed_tools=[
                 *BUILTIN_TOOLS,
                 *PUPPETEER_TOOLS,
+                # *SERENA_TOOLS,
             ],
             mcp_servers={
                 "puppeteer": {"command": "npx", "args": ["puppeteer-mcp-server"]}
