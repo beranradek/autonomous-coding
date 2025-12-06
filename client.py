@@ -31,6 +31,18 @@ PUPPETEER_TOOLS = [
     "mcp__puppeteer__puppeteer_evaluate",
 ]
 
+POSTGRES_TOOLS = [
+    "mcp__postgres__list_schemas",
+    "mcp__postgres__list_objects",
+    "mcp__postgres__get_object_details",
+    "mcp__postgres__execute_sql",
+    "mcp__postgres__explain_query",
+    "mcp__postgres__get_top_queries",
+    "mcp__postgres__analyze_workload_indexes",
+    "mcp__postgres__analyze_query_indexes",
+    "mcp__postgres__analyze_db_health",
+]
+
 # Serena MCP tools
 SERENA_TOOLS = [
     "mcp__serena__find_file",
@@ -99,6 +111,7 @@ def create_client(project_dir: Path, model: str) -> ClaudeSDKClient:
                 *CONTEXT7_TOOLS,
                 # Allow Puppeteer MCP tools for browser automation
                 *PUPPETEER_TOOLS,
+                *POSTGRES_TOOLS,
                 # *SERENA_TOOLS,
             ],
         },
@@ -116,7 +129,7 @@ def create_client(project_dir: Path, model: str) -> ClaudeSDKClient:
     print("   - Sandbox enabled (OS-level bash isolation)")
     print(f"   - Filesystem restricted to: {project_dir.resolve()}")
     print("   - Bash commands restricted to allowlist (see security.py)")
-    print("   - MCP servers: context7, puppeteer (browser automation)")
+    print("   - MCP servers: context7, puppeteer (browser automation), postgres")
     print()
 
     return ClaudeSDKClient(
@@ -127,11 +140,13 @@ def create_client(project_dir: Path, model: str) -> ClaudeSDKClient:
                 *BUILTIN_TOOLS,
                 *CONTEXT7_TOOLS,
                 *PUPPETEER_TOOLS,
+                *POSTGRES_TOOLS,
                 # *SERENA_TOOLS,
             ],
             mcp_servers={
                 "context7": {"command": "npx", "args": ["-y", "@upstash/context7-mcp@latest"]},
                 "puppeteer": {"command": "npx", "args": ["puppeteer-mcp-server"]},
+                "postgres": {"command": "uv","args": ["run","postgres-mcp","--access-mode=unrestricted"],"env": {"DATABASE_URI": "postgresql://postgres:postgres@localhost:5432/artbeams"}},
             },
             hooks={
                 "PreToolUse": [

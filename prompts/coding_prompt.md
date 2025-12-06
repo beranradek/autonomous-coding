@@ -163,7 +163,19 @@ Before context fills up:
 
 ## TESTING REQUIREMENTS
 
-**ALL testing must use browser automation tools.**
+These steps must be performed within the testing (if applicable for concrete application):
+
+- No duplication of resources and code. DRY! YAGNI and SOLID design principles are followed. Project conventions are followed.
+- Code compiles
+- Unit tests for critical functionalities are written and passing
+- DB structure and/or data update for new feature was successfully executed on local DB
+- Application is runnable and starts correctly
+- Implemented UI is functional within the browser (both possible public and administration part)
+- Implemented API is functional
+- Test data passed to implemented UI or API feature is stored in DB successfully and test data is precisely cleaned after the test without affecting another already present data that must be preserved
+- No security issues in the code nor in the browser are present. No hardcoded credentials. Libraries are without security issues. OWASP, ISO 27 000 security standards and GDPR are maintained.
+
+**ALL testing must use browser automation tools if browser user interface is developed.**
 
 Available tools:
 - puppeteer_navigate - Start browser and go to URL
@@ -172,8 +184,15 @@ Available tools:
 - puppeteer_fill - Fill form inputs
 - puppeteer_evaluate - Execute JavaScript (use sparingly, only for debugging)
 
-Test like a human user with mouse and keyboard. Don't take shortcuts by using JavaScript evaluation.
-Don't use the puppeteer "active tab" tool.
+Test like a human user with mouse and keyboard. Don't take shortcuts by using JavaScript evaluation. Don't use the puppeteer "active tab" tool.
+
+**Use postgres tools if Postgres DB data management is involved in new feature.**
+
+Available tools:
+- list_schemas,
+- list_objects,
+- get_object_details,
+- execute_sql
 
 ---
 
