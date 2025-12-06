@@ -30,6 +30,7 @@ async def run_agent_session(
     client: ClaudeSDKClient,
     message: str,
     project_dir: Path,
+    previous_error: Optional[str] = None,
 ) -> tuple[str, str]:
     """
     Run a single agent session using Claude Agent SDK.
@@ -38,6 +39,7 @@ async def run_agent_session(
         client: Claude SDK client
         message: The prompt to send
         project_dir: Project directory path
+        previous_error: Optional error message from previous session to inform the agent
 
     Returns:
         (status, response_text) where status is:
@@ -46,6 +48,25 @@ async def run_agent_session(
         - "large_response_error" if a response exceeded buffer limits
     """
     print("Sending prompt to Claude Agent SDK...\n")
+
+    # If there was a previous error, prepend it to the message so the agent knows
+    if previous_error:
+        error_context = f"""
+IMPORTANT: The previous session encountered an error. You must adapt your approach to avoid repeating this error.
+
+Previous Error:
+{previous_error}
+
+Action Required:
+- DO NOT repeat the exact same action that caused this error
+- If the error was from a screenshot being too large, use different screenshot settings (smaller dimensions, lower quality) or skip screenshots
+- If the error was from a tool response being too large, use different tool parameters to get smaller responses
+- Acknowledge this error and explain your adapted approach before proceeding
+
+Continue with your task, taking this error into account:
+
+"""
+        message = error_context + message
 
     try:
         # Send the query
@@ -102,9 +123,13 @@ async def run_agent_session(
         # Handle JSON buffer overflow errors specifically
         if "JSON message exceeded maximum buffer size" in error_msg or "Failed to decode JSON" in error_msg:
             print(f"\n⚠️  Large Response Error: Tool response exceeded 1MB buffer size")
-            print("This typically happens when screenshots are too large.")
-            print("The agent will retry with a fresh session...\n")
-            return "large_response_error", error_msg
+            # Return a detailed error message that will be passed to the next iteration
+            detailed_error = (
+                "Tool response exceeded 1MB buffer size (likely from a screenshot being too large). "
+                "To avoid this error, you should either: take smaller screenshots or skip them now and focus on functional testing. "
+                "The issue may be with page content rendering too large."
+            )
+            return "large_response_error", detailed_error
 
         # Handle other errors
         print(f"Error during agent session: {e}")
@@ -197,6 +222,7 @@ async def run_autonomous_agent(
 
     # Main loop
     iteration = 0
+    last_error = None  # Track errors to pass to next session
 
     while True:
         iteration += 1
@@ -224,24 +250,27 @@ async def run_autonomous_agent(
         else:
             prompt = get_coding_prompt()
 
-        # Run session with async context manager
+        # Run session with async context manager, passing any error from previous session
         async with client:
-            status, response = await run_agent_session(client, prompt, project_dir)
+            status, response = await run_agent_session(client, prompt, project_dir, previous_error=last_error)
 
         # Handle status
         if status == "continue":
+            last_error = None  # Clear error on success
             print(f"\nAgent will auto-continue in {AUTO_CONTINUE_DELAY_SECONDS}s...")
             print_progress_summary(project_dir)
             await asyncio.sleep(AUTO_CONTINUE_DELAY_SECONDS)
 
         elif status == "large_response_error":
-            print("\n⚠️  Retrying due to large response error...")
-            print("Agent will automatically continue with a fresh session...\n")
+            print("\n⚠️  Continuing with error context...")
+            print("The agent will be informed about the error and adapt its approach...\n")
+            last_error = response  # Save error details to pass to next session
             await asyncio.sleep(AUTO_CONTINUE_DELAY_SECONDS)
 
         elif status == "error":
             print("\nSession encountered an error")
-            print("Will retry with a fresh session...")
+            print("The agent will be informed and retry with adapted approach...")
+            last_error = response  # Save error details to pass to next session
             await asyncio.sleep(AUTO_CONTINUE_DELAY_SECONDS)
 
         # Small delay between sessions
