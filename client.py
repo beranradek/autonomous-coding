@@ -20,6 +20,24 @@ CONTEXT7_TOOLS = [
     "mcp__context7__get-library-docs",
 ]
 
+BROWSERMCP_TOOLS = [
+    "mcp__browsermcp__browser_navigate",
+    "mcp__browsermcp__browser_go_back",
+    "mcp__browsermcp__browser_go_forward",
+    "mcp__browsermcp__dom.click",
+    "mcp__browsermcp__dom.type",
+    "mcp__browsermcp__dom.hover",
+    "mcp__browsermcp__dom.select",
+    "mcp__browsermcp__snapshot.accessibility",
+    "mcp__browsermcp__tabs.list",
+    "mcp__browsermcp__tabs.select",
+    "mcp__browsermcp__tabs.news",
+    "mcp__browsermcp__tabs.close",
+    "mcp__browsermcp__console.get",
+    "mcp__browsermcp__screenshot.capture",
+    "mcp__browsermcp__js.execute",
+]
+
 # Puppeteer MCP tools for browser automation
 PUPPETEER_TOOLS = [
     "mcp__puppeteer__puppeteer_navigate",
@@ -119,8 +137,9 @@ def create_client(project_dir: Path, model: str) -> ClaudeSDKClient:
                 "WebFetch(*)",
                 "WebSearch",
                 *CONTEXT7_TOOLS,
+                *BROWSERMCP_TOOLS,
                 # Allow Puppeteer MCP tools for browser automation
-                *PUPPETEER_TOOLS,
+                # *PUPPETEER_TOOLS,
                 *POSTGRES_TOOLS,
                 # *SERENA_TOOLS,
             ],
@@ -139,7 +158,7 @@ def create_client(project_dir: Path, model: str) -> ClaudeSDKClient:
     print("   - Sandbox enabled (OS-level bash isolation)")
     print(f"   - Filesystem restricted to: {project_dir.resolve()}")
     print("   - Bash commands restricted to allowlist (see security.py)")
-    print("   - MCP servers: context7, puppeteer (browser automation), postgres")
+    print("   - MCP servers: see client.py")
     print()
 
     return ClaudeSDKClient(
@@ -149,14 +168,17 @@ def create_client(project_dir: Path, model: str) -> ClaudeSDKClient:
             allowed_tools=[
                 *BUILTIN_TOOLS,
                 *CONTEXT7_TOOLS,
-                *PUPPETEER_TOOLS,
+                *BROWSERMCP_TOOLS,
+                # *PUPPETEER_TOOLS, # Problems with every time large screenshots
                 *POSTGRES_TOOLS,
                 # *SERENA_TOOLS,
             ],
             # Using enhanced https://github.com/sultannaufal/puppeteer-mcp-server with mouse tools that also allows configuration of screenshot quality
             mcp_servers={
                 "context7": {"command": "npx", "args": ["-y", "@upstash/context7-mcp@latest"]},
-                "puppeteer": {"command": "npx", "args": ["puppeteer-mcp-server"], "env": {"SCREENSHOT_QUALITY": "60","SCREENSHOT_DEFAULT_WIDTH": "800","SCREENSHOT_DEFAULT_HEIGHT": "600","SCREENSHOT_MAX_WIDTH": "1280","SCREENSHOT_MAX_HEIGHT": "800"}},
+                # "puppeteer": {"command": "npx", "args": ["puppeteer-mcp-server"], "env": {"SCREENSHOT_QUALITY": "60","SCREENSHOT_DEFAULT_WIDTH": "800","SCREENSHOT_DEFAULT_HEIGHT": "600","SCREENSHOT_MAX_WIDTH": "1280","SCREENSHOT_MAX_HEIGHT": "800"}},
+                # Browser MCP enhanced by D. Strejc:
+                "browsermcp": {"type": "http", "url": "http://127.0.0.1:3000/mcp"},
                 "postgres": {"command": "uv","args": ["run","postgres-mcp","--access-mode=unrestricted"],"env": {"DATABASE_URI": "postgresql://postgres:postgres@localhost:5432/artbeams"}},
             },
             hooks={

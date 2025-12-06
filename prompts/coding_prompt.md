@@ -177,22 +177,13 @@ These steps must be performed within the testing (if applicable for concrete app
 
 **ALL testing must use browser automation tools if browser user interface is developed.**
 
-Available tools:
-- puppeteer_navigate - Start browser and go to URL
-- puppeteer_screenshot - Capture screenshot
-- puppeteer_click - Click elements
-- puppeteer_fill - Fill form inputs
-- puppeteer_evaluate - Execute JavaScript (use sparingly, only for debugging)
+Start browser and go to URL, capture screenshot in small quality to not overload context, click elements, fill form inputs if needed, execute JavaScript only sparingly (only for debugging)
 
-Test like a human user with mouse and keyboard. Don't take shortcuts by using JavaScript evaluation. Don't use the puppeteer "active tab" tool.
+Test like a human user with mouse and keyboard. Don't take shortcuts by using JavaScript evaluation.
 
 **Use postgres tools if Postgres DB data management is involved in new feature.**
 
-Available tools:
-- list_schemas,
-- list_objects,
-- get_object_details,
-- execute_sql
+You can list schemas and DB objects, get DB object details and execute SQL queries.
 
 ---
 
