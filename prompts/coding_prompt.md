@@ -172,7 +172,9 @@ These steps must be performed within the testing (if applicable for concrete app
 - Application is runnable and starts correctly
 - Implemented UI is functional within the browser (both possible public and administration part)
 - Implemented API is functional
-- Test data passed to implemented UI or API feature is stored in DB successfully and test data is precisely cleaned after the test without affecting another already present data that must be preserved
+- Test data passed to implemented UI or API feature is stored in DB successfully
+- Outcomes in external systems (database, file system, GitHub ...) are verified
+- Test data is precisely cleaned up after tests, without affecting another already present data that must be preserved
 - No security issues in the code nor in the browser are present. No hardcoded credentials. Libraries are without security issues. OWASP, ISO 27 000 security standards and GDPR are maintained.
 
 **ALL testing must use browser automation tools if browser user interface is developed.**
