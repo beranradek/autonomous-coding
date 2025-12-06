@@ -74,62 +74,74 @@ Continue with your task, taking this error into account:
 
         # Collect response text and show tool use
         response_text = ""
-        async for msg in client.receive_response():
-            msg_type = type(msg).__name__
+        last_tool_name = None  # Track the last tool that was called
 
-            # Handle AssistantMessage (text and tool use)
-            if msg_type == "AssistantMessage" and hasattr(msg, "content"):
-                for block in msg.content:
-                    block_type = type(block).__name__
+        try:
+            async for msg in client.receive_response():
+                msg_type = type(msg).__name__
 
-                    if block_type == "TextBlock" and hasattr(block, "text"):
-                        response_text += block.text
-                        print(block.text, end="", flush=True)
-                    elif block_type == "ToolUseBlock" and hasattr(block, "name"):
-                        print(f"\n[Tool: {block.name}]", flush=True)
-                        if hasattr(block, "input"):
-                            input_str = str(block.input)
-                            if len(input_str) > 200:
-                                print(f"   Input: {input_str[:200]}...", flush=True)
+                # Handle AssistantMessage (text and tool use)
+                if msg_type == "AssistantMessage" and hasattr(msg, "content"):
+                    for block in msg.content:
+                        block_type = type(block).__name__
+
+                        if block_type == "TextBlock" and hasattr(block, "text"):
+                            response_text += block.text
+                            print(block.text, end="", flush=True)
+                        elif block_type == "ToolUseBlock" and hasattr(block, "name"):
+                            last_tool_name = block.name  # Track tool name
+                            print(f"\n[Tool: {block.name}]", flush=True)
+                            if hasattr(block, "input"):
+                                input_str = str(block.input)
+                                if len(input_str) > 200:
+                                    print(f"   Input: {input_str[:200]}...", flush=True)
+                                else:
+                                    print(f"   Input: {input_str}", flush=True)
+
+                # Handle UserMessage (tool results)
+                elif msg_type == "UserMessage" and hasattr(msg, "content"):
+                    for block in msg.content:
+                        block_type = type(block).__name__
+
+                        if block_type == "ToolResultBlock":
+                            result_content = getattr(block, "content", "")
+                            is_error = getattr(block, "is_error", False)
+
+                            # Check if command was blocked by security hook
+                            if "blocked" in str(result_content).lower():
+                                print(f"   [BLOCKED] {result_content}", flush=True)
+                            elif is_error:
+                                # Show errors (truncated)
+                                error_str = str(result_content)[:500]
+                                print(f"   [Error] {error_str}", flush=True)
                             else:
-                                print(f"   Input: {input_str}", flush=True)
+                                # Tool succeeded - just show brief confirmation
+                                print("   [Done]", flush=True)
 
-            # Handle UserMessage (tool results)
-            elif msg_type == "UserMessage" and hasattr(msg, "content"):
-                for block in msg.content:
-                    block_type = type(block).__name__
+        except Exception as stream_error:
+            # Handle errors that occur during message streaming
+            error_msg = str(stream_error)
 
-                    if block_type == "ToolResultBlock":
-                        result_content = getattr(block, "content", "")
-                        is_error = getattr(block, "is_error", False)
+            # Check if this is a buffer overflow error from the SDK
+            if "JSON message exceeded maximum buffer size" in error_msg or "Failed to decode JSON" in error_msg:
+                print(f"\n⚠️  Large Response Error: Tool response exceeded 1MB buffer size")
+                tool_info = f" (from tool: {last_tool_name})" if last_tool_name else ""
+                detailed_error = (
+                    f"Tool response exceeded 1MB buffer size{tool_info}. "
+                    "This typically happens with screenshots that are too large. "
+                    "To avoid this error: (1) skip taking screenshots and focus on functional testing, "
+                    "or (2) if screenshots are essential, the page content may be too large to capture."
+                )
+                return "large_response_error", detailed_error
 
-                        # Check if command was blocked by security hook
-                        if "blocked" in str(result_content).lower():
-                            print(f"   [BLOCKED] {result_content}", flush=True)
-                        elif is_error:
-                            # Show errors (truncated)
-                            error_str = str(result_content)[:500]
-                            print(f"   [Error] {error_str}", flush=True)
-                        else:
-                            # Tool succeeded - just show brief confirmation
-                            print("   [Done]", flush=True)
+            # Re-raise other streaming errors
+            raise
 
         print("\n" + "-" * 70 + "\n")
         return "continue", response_text
 
     except Exception as e:
         error_msg = str(e)
-
-        # Handle JSON buffer overflow errors specifically
-        if "JSON message exceeded maximum buffer size" in error_msg or "Failed to decode JSON" in error_msg:
-            print(f"\n⚠️  Large Response Error: Tool response exceeded 1MB buffer size")
-            # Return a detailed error message that will be passed to the next iteration
-            detailed_error = (
-                "Tool response exceeded 1MB buffer size (likely from a screenshot being too large). "
-                "To avoid this error, you should either: take smaller screenshots or skip them now and focus on functional testing. "
-                "The issue may be with page content rendering too large."
-            )
-            return "large_response_error", detailed_error
 
         # Handle other errors
         print(f"Error during agent session: {e}")

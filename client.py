@@ -29,6 +29,7 @@ PUPPETEER_TOOLS = [
     "mcp__puppeteer__puppeteer_select",
     "mcp__puppeteer__puppeteer_hover",
     "mcp__puppeteer__puppeteer_evaluate",
+    "mcp__puppeteer__puppeteer_connect_active_tab",
     "mcp__puppeteer__puppeteer_mouse_move",
     "mcp__puppeteer__puppeteer_mouse_click",
     "mcp__puppeteer__puppeteer_mouse_down",

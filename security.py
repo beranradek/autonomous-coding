@@ -63,6 +63,8 @@ ALLOWED_COMMANDS = {
     "pkill",  # For killing dev servers; validated separately
     "systemctl",
     "source",
+    # Manipulate JSON data
+    "jq",
     # Others
     "echo",
     "which",
@@ -204,6 +206,7 @@ def validate_pkill_command(command_string: str) -> tuple[bool, str]:
         "npx",
         "vite",
         "next",
+        "java",
     }
 
     try:
