@@ -43,6 +43,7 @@ async def run_agent_session(
         (status, response_text) where status is:
         - "continue" if agent should continue working
         - "error" if an error occurred
+        - "large_response_error" if a response exceeded buffer limits
     """
     print("Sending prompt to Claude Agent SDK...\n")
 
@@ -96,8 +97,18 @@ async def run_agent_session(
         return "continue", response_text
 
     except Exception as e:
+        error_msg = str(e)
+
+        # Handle JSON buffer overflow errors specifically
+        if "JSON message exceeded maximum buffer size" in error_msg or "Failed to decode JSON" in error_msg:
+            print(f"\n⚠️  Large Response Error: Tool response exceeded 1MB buffer size")
+            print("This typically happens when screenshots are too large.")
+            print("The agent will retry with a fresh session...\n")
+            return "large_response_error", error_msg
+
+        # Handle other errors
         print(f"Error during agent session: {e}")
-        return "error", str(e)
+        return "error", error_msg
 
 
 async def run_autonomous_agent(
@@ -221,6 +232,11 @@ async def run_autonomous_agent(
         if status == "continue":
             print(f"\nAgent will auto-continue in {AUTO_CONTINUE_DELAY_SECONDS}s...")
             print_progress_summary(project_dir)
+            await asyncio.sleep(AUTO_CONTINUE_DELAY_SECONDS)
+
+        elif status == "large_response_error":
+            print("\n⚠️  Retrying due to large response error...")
+            print("Agent will automatically continue with a fresh session...\n")
             await asyncio.sleep(AUTO_CONTINUE_DELAY_SECONDS)
 
         elif status == "error":

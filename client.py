@@ -29,6 +29,15 @@ PUPPETEER_TOOLS = [
     "mcp__puppeteer__puppeteer_select",
     "mcp__puppeteer__puppeteer_hover",
     "mcp__puppeteer__puppeteer_evaluate",
+    "mcp__puppeteer__puppeteer_mouse_move",
+    "mcp__puppeteer__puppeteer_mouse_click",
+    "mcp__puppeteer__puppeteer_mouse_down",
+    "mcp__puppeteer__puppeteer_mouse_up",
+    "mcp__puppeteer__puppeteer_mouse_wheel",
+    "mcp__puppeteer__puppeteer_mouse_drag",
+    "mcp__puppeteer__puppeteer_get_cookies",
+    "mcp__puppeteer__puppeteer_set_cookies",
+    "mcp__puppeteer__puppeteer_delete_cookies",
 ]
 
 POSTGRES_TOOLS = [
@@ -143,9 +152,10 @@ def create_client(project_dir: Path, model: str) -> ClaudeSDKClient:
                 *POSTGRES_TOOLS,
                 # *SERENA_TOOLS,
             ],
+            # Using enhanced https://github.com/sultannaufal/puppeteer-mcp-server with mouse tools that also allows configuration of screenshot quality
             mcp_servers={
                 "context7": {"command": "npx", "args": ["-y", "@upstash/context7-mcp@latest"]},
-                "puppeteer": {"command": "npx", "args": ["puppeteer-mcp-server"]},
+                "puppeteer": {"command": "npx", "args": ["puppeteer-mcp-server"], "env": {"SCREENSHOT_QUALITY": "60","SCREENSHOT_DEFAULT_WIDTH": "800","SCREENSHOT_DEFAULT_HEIGHT": "600","SCREENSHOT_MAX_WIDTH": "1280","SCREENSHOT_MAX_HEIGHT": "800"}},
                 "postgres": {"command": "uv","args": ["run","postgres-mcp","--access-mode=unrestricted"],"env": {"DATABASE_URI": "postgresql://postgres:postgres@localhost:5432/artbeams"}},
             },
             hooks={

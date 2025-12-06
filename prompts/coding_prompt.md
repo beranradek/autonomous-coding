@@ -85,12 +85,12 @@ You can use context7 tools to lookup up-to-date documentation of frameworks and 
 
 ### STEP 6: VERIFY WITH BROWSER AUTOMATION
 
-**CRITICAL:** You MUST verify features through the actual UI.
+**CRITICAL:** You MUST verify UI features through the actual UI.
 
 Use browser automation tools:
 - Navigate to the app in a real browser
 - Interact like a human user (click, type, scroll)
-- Take screenshots at each step
+- Take screenshots at each step - use only smaller dimensions (800x600) for intermediate steps and non-problematic tests. Use standard dimensions (1280x800) only when more details are needed
 - Verify both functionality AND visual appearance
 
 **DO:**
