@@ -46,6 +46,7 @@ async def run_agent_session(
         - "continue" if agent should continue working
         - "error" if an error occurred
         - "large_response_error" if a response exceeded buffer limits
+        - "rate_limit" if API rate limit was hit
     """
     print("Sending prompt to Claude Agent SDK...\n")
 
@@ -107,12 +108,20 @@ Continue with your task, taking this error into account:
                             result_content = getattr(block, "content", "")
                             is_error = getattr(block, "is_error", False)
 
+                            # Convert content to string for checking
+                            content_str = str(result_content)
+
+                            # Check for rate limit error
+                            if "Limit reached" in content_str and "resets" in content_str:
+                                print(f"\n⚠️  Rate Limit Reached\n{content_str}", flush=True)
+                                return "rate_limit", "API rate limit has been reached. The program cannot continue until the limit resets."
+
                             # Check if command was blocked by security hook
-                            if "blocked" in str(result_content).lower():
+                            if "blocked" in content_str.lower():
                                 print(f"   [BLOCKED] {result_content}", flush=True)
                             elif is_error:
                                 # Show errors (truncated)
-                                error_str = str(result_content)[:500]
+                                error_str = content_str[:500]
                                 print(f"   [Error] {error_str}", flush=True)
                             else:
                                 # Tool succeeded - just show brief confirmation
@@ -272,6 +281,16 @@ async def run_autonomous_agent(
             print(f"\nAgent will auto-continue in {AUTO_CONTINUE_DELAY_SECONDS}s...")
             print_progress_summary(project_dir)
             await asyncio.sleep(AUTO_CONTINUE_DELAY_SECONDS)
+
+        elif status == "rate_limit":
+            print("\n" + "=" * 70)
+            print("  RATE LIMIT REACHED - STOPPING")
+            print("=" * 70)
+            print(f"\n{response}")
+            print("\nThe autonomous agent cannot continue until the rate limit resets.")
+            print("Please wait for the reset time and run the script again to resume.")
+            print("\n" + "=" * 70)
+            break  # Exit the loop completely
 
         elif status == "large_response_error":
             print("\n⚠️  Continuing with error context...")
