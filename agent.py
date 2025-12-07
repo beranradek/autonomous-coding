@@ -12,7 +12,7 @@ from typing import Optional
 from base_client import BaseClient
 from claude_sdk_client import create_client as create_claude_client
 from copilot_client import create_copilot_client, CopilotEvent
-from progress import print_session_header, print_progress_summary
+from progress import print_session_header, print_progress_summary, is_work_complete
 from prompts import (
     get_initializer_prompt,
     get_coding_prompt,
@@ -308,12 +308,15 @@ async def run_autonomous_agent(
         # Choose prompt based on run mode
         if run_mode == "greenfield_init":
             prompt = get_initializer_prompt()
+            was_initializer = True
             run_mode = "continue"  # Switch to continue mode after first session
         elif run_mode == "enhancement_init":
             prompt = get_enhancement_initializer_prompt()
+            was_initializer = True
             run_mode = "continue"  # Switch to continue mode after first session
         else:
             prompt = get_coding_prompt()
+            was_initializer = False
 
         # Run session with async context manager, passing any error from previous session
         async with client:
@@ -322,6 +325,51 @@ async def run_autonomous_agent(
         # Handle status
         if status == "continue":
             last_error = None  # Clear error on success
+            
+            # CRITICAL: If this was an initializer session, verify feature_list.json was created
+            if was_initializer:
+                if not tests_file.exists():
+                    print("\n" + "=" * 70)
+                    print("  INITIALIZER FAILED")
+                    print("=" * 70)
+                    print("\nERROR: Initializer session completed but feature_list.json was not created.")
+                    print("This is a critical failure. The autonomous agent cannot continue without")
+                    print("a feature list defining the work to be done.")
+                    print("\nPossible causes:")
+                    print("  - The AI agent encountered an error during initialization")
+                    print("  - The app_spec.txt may be invalid or missing")
+                    print("  - There may be permission issues writing to the project directory")
+                    print("\nPlease review the session output above and fix the issue before retrying.")
+                    print("=" * 70)
+                    break  # Exit the loop
+                
+                # Verify the file is valid JSON
+                try:
+                    import json
+                    with open(tests_file, "r") as f:
+                        json.load(f)
+                except (json.JSONDecodeError, IOError) as e:
+                    print("\n" + "=" * 70)
+                    print("  CORRUPTED FEATURE LIST")
+                    print("=" * 70)
+                    print("\nERROR: feature_list.json exists but contains invalid JSON.")
+                    print("The autonomous agent cannot continue with a corrupted feature list.")
+                    print(f"\nJSON Error: {e}")
+                    print("\nPlease fix the feature_list.json file manually and retry.")
+                    print("The file should contain a valid JSON array of feature objects.")
+                    print("=" * 70)
+                    break  # Exit the loop
+            
+            # Check if all work is complete
+            if is_work_complete(project_dir):
+                print("\n" + "=" * 70)
+                print("  ALL FEATURES COMPLETE!")
+                print("=" * 70)
+                print("\nAll features in feature_list.json are now passing.")
+                print("No remaining work - stopping autonomous agent.")
+                print_progress_summary(project_dir)
+                break  # Exit the loop
+            
             print(f"\nAgent will auto-continue in {AUTO_CONTINUE_DELAY_SECONDS}s...")
             print_progress_summary(project_dir)
             await asyncio.sleep(AUTO_CONTINUE_DELAY_SECONDS)
