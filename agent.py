@@ -36,7 +36,7 @@ async def run_agent_session(
     Run a single agent session using Claude Agent SDK.
 
     Args:
-        client: Claude SDK client
+        client: AI CLI client
         message: The prompt to send
         project_dir: Project directory path
         previous_error: Optional error message from previous session to inform the agent

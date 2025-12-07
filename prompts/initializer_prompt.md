@@ -96,7 +96,7 @@ the highest-priority features from feature_list.json. Remember:
 
 Before your context fills up:
 1. Commit all work with descriptive messages
-2. Create `agent_progress.txt` with a summary of what you accomplished
+2. Create `agent_progress.txt` with a very brief summary of what you accomplished. Do not duplicate info from `app_spec.txt`, `feature_list.json`, `AGENTS.md` or `CLAUDE.md` here.
 3. Ensure feature_list.json is complete and saved
 4. Leave the environment in a clean, working state
 

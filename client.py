@@ -33,6 +33,7 @@ BROWSERMCP_TOOLS = [
     "mcp__browsermcp__browser_extract_html",
     "mcp__browsermcp__browser_select_option",
     "mcp__browsermcp__browser_press_key",
+    "mcp__browsermcp__browser_tab",
     "mcp__browsermcp__dom.click",
     "mcp__browsermcp__dom.type",
     "mcp__browsermcp__dom.hover",
@@ -89,6 +90,7 @@ SERENA_TOOLS = [
     "mcp__serena__get_symbols_overview",
     "mcp__serena__replace_symbol_body",
     "mcp__serena__insert_before_symbol",
+    "mcp__serena__insert_after_symbol",
     "mcp__serena__list_dir",
     "mcp__serena__find_referencing_symbols",
 ]

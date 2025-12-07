@@ -113,14 +113,14 @@ fi
 
 ### SIXTH TASK: Create or Update agent_progress.txt
 
-If `agent_progress.txt` doesn't exist, create it with brief records:
-- Summary of existing project structure
-- Technology stack identified
-- Current state of the application
+If `agent_progress.txt` doesn't exist, create it with very brief records:
+- Current state of the application related to the features to implement
 - Plan for implementing new features
 - What you accomplished in this session
 
 If it EXISTS, append your session notes to it.
+
+Do not duplicate info from `app_spec.txt`, `feature_list.json`, `AGENTS.md` or `CLAUDE.md` here.
 
 ### SEVENTH TASK: Understand Existing Functionality
 
@@ -146,9 +146,9 @@ the highest-priority NEW features from feature_list.json. Remember:
 
 Before your context fills up:
 1. Commit all work with descriptive messages
-2. Update `agent_progress.txt` with:
+2. Update `agent_progress.txt` with a very brief:
    - Summary of what you accomplished
-   - Analysis of existing codebase
+   - Analysis of existing codebase related to features to implement
    - Recommendations for future sessions
 3. Ensure feature_list.json is complete and saved
 4. Leave the environment in a clean, working state

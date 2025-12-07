@@ -143,12 +143,14 @@ git commit -m "Implement [feature name] - verified end-to-end
 
 ### STEP 9: UPDATE PROGRESS NOTES
 
-Update `agent_progress.txt` with:
+Update `agent_progress.txt` with very brief progress:
 - What you accomplished this session
 - Which test(s) you completed
 - Any issues discovered or fixed
 - What should be worked on next
 - Current completion status (e.g., "45/200 tests passing")
+
+Do not duplicate info from `app_spec.txt`, `feature_list.json`, `AGENTS.md` or `CLAUDE.md` here.
 
 ### STEP 10: END SESSION CLEANLY
 
@@ -203,8 +205,7 @@ You can list schemas and DB objects, get DB object details and execute SQL queri
 - All features work end-to-end through the UI
 - Fast, responsive, professional
 
-**You have unlimited time.** Take as long as needed to get it right. The most important thing is that you
-leave the code base in a clean state before terminating the session (Step 10).
+**You have unlimited time.** Take as long as needed to get it right. The most important thing is that you leave the code base in a clean state before terminating the session (Step 10).
 
 ---
 
