@@ -30,6 +30,8 @@ BROWSERMCP_TOOLS = [
     "mcp__browsermcp__browser_select_option",
     "mcp__browsermcp__browser_press_key",
     "mcp__browsermcp__browser_tab",
+    "mcp__browsermcp__browser_scroll",
+    "mcp__browsermcp__browser_get_console_logs",
     "mcp__browsermcp__dom.click",
     "mcp__browsermcp__dom.type",
     "mcp__browsermcp__dom.hover",
