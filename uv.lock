@@ -40,10 +40,14 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "claude-code-sdk" },
+    { name = "python-dotenv" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "claude-code-sdk", specifier = ">=0.0.25" }]
+requires-dist = [
+    { name = "claude-code-sdk", specifier = ">=0.0.25" },
+    { name = "python-dotenv", specifier = ">=1.0.0" },
+]
 
 [package.metadata.requires-dev]
 dev = []

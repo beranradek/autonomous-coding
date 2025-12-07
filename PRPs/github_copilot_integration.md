@@ -239,7 +239,7 @@ asyncio.run(main())
 
 But it must be adapted to the project needs.
 Try your best so the output from copilot cli process is parsed correctly
-and is detailed/responsive and useful for end user reading/following output of autonomous coding process (sessions), including tool calls and final responses of the agent.
+and is detailed/responsive and useful and updated for end user reading/following output of autonomous coding process (sessions), including tool calls and final responses of the agent.
 
 Pass in the system environment variables to the Copilot subprocess so it
 can read needed variables like GITHUB_TOKEN, COPILOT_API_KEY etc.

@@ -35,11 +35,22 @@ uv run python -c "import claude_code_sdk; print(claude_code_sdk.__version__)"
 pip show claude-code-sdk  # Check SDK is installed
 ```
 
-**API Key:** Set your Anthropic API key (but this can cost lot of money for long runs, rather set CLAUDE_CODE_OAUTH_TOKEN leveraging your regular paid subscription - see instructions in subscription.py):
+**API Key:** Set your Anthropic API key for Claude SDK (but this can cost lot of money for long runs, rather set CLAUDE_CODE_OAUTH_TOKEN leveraging your regular paid subscription - see instructions in subscription.py):
 ```bash
 # export ANTHROPIC_API_KEY='your-api-key-here'
 export CLAUDE_CODE_OAUTH_TOKEN='your-api-key-here'
 ```
+
+**For GitHub Copilot CLI:** Ensure you have GitHub authentication configured:
+```bash
+# GitHub token for Copilot access
+export GITHUB_TOKEN="your-github-token"
+
+# Or use GitHub CLI authentication
+gh auth login
+```
+
+See `copilot/README.md` for detailed Copilot CLI configuration including MCP servers.
 
 **Prepare your application specification in prompts/app_spec.txt:**
 - See `GENERATING_APP_SPEC.md` for detailed guidance
@@ -51,39 +62,42 @@ export CLAUDE_CODE_OAUTH_TOKEN='your-api-key-here'
 ### For New Projects (Greenfield Mode)
 
 ```bash
-# Using uv (recommended):
-uv run autocode.py --project-dir ./my_new_project
+# Using uv with Claude SDK (recommended):
+uv run autocode.py --cli claude --project-dir ./my_new_project
+
+# Using GitHub Copilot CLI:
+uv run autocode.py --cli copilot --project-dir ./my_new_project
 
 # Or explicitly specify greenfield mode:
-uv run autocode.py --project-dir ./my_new_project --mode greenfield
+uv run autocode.py --cli claude --project-dir ./my_new_project --mode greenfield
 
 # Using traditional python (if not using uv):
-python autocode.py --project-dir ./my_new_project
+python autocode.py --cli claude --project-dir ./my_new_project
 ```
 
 ### For Existing Projects (Enhancement Mode)
 
 ```bash
-# Using uv (recommended):
+# Using uv with Claude SDK (recommended):
 # Auto-detected if .git directory exists
 # You can point to any existing project with an absolute path that can be outside of this repo
-uv run autocode.py --project-dir ./my_existing_project
+uv run autocode.py --cli claude --project-dir ./my_existing_project
 
 # Or explicitly specify enhancement mode:
-uv run autocode.py --project-dir ./my_existing_project --mode enhancement
+uv run autocode.py --cli claude --project-dir ./my_existing_project --mode enhancement
 
 # Using traditional python (if not using uv):
-python autocode.py --project-dir ./my_existing_project --mode enhancement
+python autocode.py --cli claude --project-dir ./my_existing_project --mode enhancement
 ```
 
 ### Testing with Limited Iterations
 
 ```bash
 # Using uv:
-uv run autocode.py --project-dir ./my_project --max-iterations 3
+uv run autocode.py --cli claude --project-dir ./my_project --max-iterations 3
 
 # Using traditional python:
-python autocode.py --project-dir ./my_project --max-iterations 3
+python autocode.py --cli claude --project-dir ./my_project --max-iterations 3
 ```
 
 ## Important Timing Expectations
@@ -207,9 +221,10 @@ The application will typically be available at `http://localhost:3000` or simila
 
 | Option | Description | Default |
 |--------|-------------|---------|
+| `--cli` | **Required**. AI provider: `claude` (Claude SDK) or `copilot` (GitHub Copilot CLI) | None (required) |
 | `--project-dir` | Directory for the project | `./autonomous_project` |
 | `--max-iterations` | Max agent iterations | Unlimited |
-| `--model` | Claude model to use | `claude-sonnet-4-5-20250929` |
+| `--model` | Claude model to use (only for `--cli claude`) | `claude-sonnet-4-5-20250929` |
 | `--mode` | Mode: `auto`, `greenfield`, or `enhancement` | `auto` (auto-detect) |
 
 ### Mode Selection
@@ -253,11 +268,11 @@ EOF
 ```bash
 # From the autonomous-coding directory
 
-# Using uv (recommended):
-uv run autocode.py --project-dir /path/to/your/existing/project --mode enhancement
+# Using uv with Claude SDK (recommended):
+uv run autocode.py --cli claude --project-dir /path/to/your/existing/project --mode enhancement
 
 # Using traditional python:
-python autocode.py --project-dir /path/to/your/existing/project --mode enhancement
+python autocode.py --cli claude --project-dir /path/to/your/existing/project --mode enhancement
 ```
 
 ### Step 3: What Happens
@@ -300,8 +315,8 @@ Edit `prompts/app_spec.txt` to specify a different application to build from scr
 1. Copy your existing project to a directory (or use an existing one)
 2. Create `app_spec.txt` in your project directory describing the NEW features to add
 3. Run:
-   - Using uv: `uv run autocode.py --project-dir ./your_project --mode enhancement`
-   - Using python: `python autocode.py --project-dir ./your_project --mode enhancement`
+   - Using uv with Claude: `uv run autocode.py --cli claude --project-dir ./your_project --mode enhancement`
+   - Using python: `python autocode.py --cli claude --project-dir ./your_project --mode enhancement`
 
 **Important:** In enhancement mode, `app_spec.txt` should describe ONLY the new features you want to add, not the entire application.
 

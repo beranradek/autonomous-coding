@@ -9,9 +9,9 @@ import asyncio
 from pathlib import Path
 from typing import Optional
 
-from claude_code_sdk import ClaudeSDKClient
-
-from client import create_client
+from base_client import BaseClient
+from claude_sdk_client import create_client as create_claude_client
+from copilot_client import create_copilot_client, CopilotEvent
 from progress import print_session_header, print_progress_summary
 from prompts import (
     get_initializer_prompt,
@@ -26,8 +26,28 @@ from prompts import (
 AUTO_CONTINUE_DELAY_SECONDS = 3
 
 
+def create_client(project_dir: Path, model: str, cli_provider: str) -> BaseClient:
+    """
+    Create an AI client based on the specified provider.
+    
+    Args:
+        project_dir: Directory for the project
+        model: Model to use (only applicable for Claude)
+        cli_provider: Provider to use ("claude" or "copilot")
+        
+    Returns:
+        BaseClient implementation for the specified provider
+    """
+    if cli_provider == "claude":
+        return create_claude_client(project_dir, model)
+    elif cli_provider == "copilot":
+        return create_copilot_client(project_dir)
+    else:
+        raise ValueError(f"Unknown CLI provider: {cli_provider}")
+
+
 async def run_agent_session(
-    client: ClaudeSDKClient,
+    client: BaseClient,
     message: str,
     project_dir: Path,
     previous_error: Optional[str] = None,
@@ -48,7 +68,7 @@ async def run_agent_session(
         - "large_response_error" if a response exceeded buffer limits
         - "rate_limit" if API rate limit was hit
     """
-    print("Sending prompt to Claude Agent SDK...\n")
+    print("Sending prompt to AI agent...\n")
 
     # If there was a previous error, prepend it to the message so the agent knows
     if previous_error:
@@ -98,6 +118,26 @@ Continue with your task, taking this error into account:
                                     print(f"   Input: {input_str[:200]}...", flush=True)
                                 else:
                                     print(f"   Input: {input_str}", flush=True)
+                
+                # Handle CopilotEvent (from Copilot CLI)
+                elif isinstance(msg, CopilotEvent):
+                    if msg.type == "text" and msg.text:
+                        response_text += msg.text
+                        print(msg.text, end="", flush=True)
+                    elif msg.type == "tool_call":
+                        tool_name = msg.meta.get("name", "unknown")
+                        last_tool_name = tool_name
+                        print(f"\n[Tool: {tool_name}]", flush=True)
+                        args = msg.meta.get("args", {})
+                        args_str = str(args)
+                        if len(args_str) > 200:
+                            print(f"   Args: {args_str[:200]}...", flush=True)
+                        else:
+                            print(f"   Args: {args_str}", flush=True)
+                    elif msg.type == "done":
+                        returncode = msg.meta.get("returncode", 0)
+                        if returncode != 0:
+                            print(f"\n[Process exited with code {returncode}]", flush=True)
 
                 # Handle UserMessage (tool results)
                 elif msg_type == "UserMessage" and hasattr(msg, "content"):
@@ -162,21 +202,25 @@ async def run_autonomous_agent(
     model: str,
     max_iterations: Optional[int] = None,
     mode: str = "auto",
+    cli_provider: str = "claude",
 ) -> None:
     """
     Run the autonomous agent loop.
 
     Args:
         project_dir: Directory for the project
-        model: Claude model to use
+        model: Model to use (only applicable for Claude)
         max_iterations: Maximum number of iterations (None for unlimited)
         mode: Mode selection - "auto", "greenfield", or "enhancement"
+        cli_provider: AI provider to use - "claude" or "copilot"
     """
     print("\n" + "=" * 70)
     print("  AUTONOMOUS CODING AGENT")
     print("=" * 70)
-    print(f"\nProject directory: {project_dir}")
-    print(f"Model: {model}")
+    print(f"\nAI Provider: {cli_provider.upper()}")
+    print(f"Project directory: {project_dir}")
+    if cli_provider == "claude":
+        print(f"Model: {model}")
     if max_iterations:
         print(f"Max iterations: {max_iterations}")
     else:
@@ -259,7 +303,7 @@ async def run_autonomous_agent(
         print_session_header(iteration, is_initializer)
 
         # Create client (fresh context)
-        client = create_client(project_dir, model)
+        client = create_client(project_dir, model, cli_provider)
 
         # Choose prompt based on run mode
         if run_mode == "greenfield_init":

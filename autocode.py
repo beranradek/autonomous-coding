@@ -17,6 +17,10 @@ import asyncio
 import os
 from pathlib import Path
 
+# Load environment variables from .env file
+from dotenv import load_dotenv
+load_dotenv()
+
 from agent import run_autonomous_agent
 from subscription import api_key
 
@@ -31,23 +35,26 @@ def parse_args() -> argparse.Namespace:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Start fresh project (auto-detected)
-  python autocode.py --project-dir ./new_project
+  # Start fresh project with Claude SDK (auto-detected)
+  python autocode.py --cli claude --project-dir ./new_project
+
+  # Start fresh project with Copilot CLI
+  python autocode.py --cli copilot --project-dir ./new_project
 
   # Add features to existing project (auto-detected if .git exists)
-  python autocode.py --project-dir ./existing_project
+  python autocode.py --cli claude --project-dir ./existing_project
 
   # Force greenfield mode (create new project)
-  python autocode.py --project-dir ./new_project --mode greenfield
+  python autocode.py --cli claude --project-dir ./new_project --mode greenfield
 
   # Force enhancement mode (add to existing project)
-  python autocode.py --project-dir ./existing_project --mode enhancement
+  python autocode.py --cli copilot --project-dir ./existing_project --mode enhancement
 
   # Limit iterations for testing
-  python autocode.py --project-dir ./project --max-iterations 5
+  python autocode.py --cli claude --project-dir ./project --max-iterations 5
 
-  # Use a specific model
-  python autocode.py --project-dir ./project --model claude-sonnet-4-5-20250929
+  # Use a specific model with Claude
+  python autocode.py --cli claude --project-dir ./project --model claude-sonnet-4-5-20250929
         """,
     )
 
@@ -70,6 +77,14 @@ Examples:
         type=str,
         default=DEFAULT_MODEL,
         help=f"Claude model to use (default: {DEFAULT_MODEL})",
+    )
+
+    parser.add_argument(
+        "--cli",
+        type=str,
+        choices=["claude", "copilot"],
+        required=True,
+        help="AI provider to use: 'claude' (Claude SDK) or 'copilot' (GitHub Copilot CLI)",
     )
 
     parser.add_argument(
@@ -110,6 +125,7 @@ def main() -> None:
                 model=args.model,
                 max_iterations=args.max_iterations,
                 mode=args.mode,
+                cli_provider=args.cli,
             )
         )
     except KeyboardInterrupt:
